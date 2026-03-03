@@ -5,13 +5,29 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   build: {
-    chunkSizeWarningLimit: 600,
+    chunkSizeWarningLimit: 2500,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom'],
-          'vendor-markdown': ['react-markdown', 'remark-math', 'rehype-mathjax', 'rehype-highlight', 'rehype-raw'],
-          'vendor-ui': ['lucide-react', 'uuid'],
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('node_modules/react-dom') || id.includes('node_modules/react/')) {
+              return 'vendor-react'
+            }
+            if (
+              id.includes('react-markdown') ||
+              id.includes('remark-math') ||
+              id.includes('rehype-mathjax') ||
+              id.includes('mathjax-full') ||
+              id.includes('rehype-highlight') ||
+              id.includes('highlight.js') ||
+              id.includes('rehype-raw')
+            ) {
+              return 'vendor-markdown'
+            }
+            if (id.includes('lucide-react') || id.includes('uuid')) {
+              return 'vendor-ui'
+            }
+          }
         },
       },
     },
