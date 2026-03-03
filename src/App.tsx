@@ -345,7 +345,11 @@ export default function App() {
             )}
 
             {/* Messages */}
-            <Suspense fallback={null}>
+            <Suspense fallback={
+              <div className="flex items-center justify-center py-8">
+                <div className="w-6 h-6 border-2 border-slate-700 border-t-violet-500 rounded-full animate-spin" />
+              </div>
+            }>
               {currentChat?.messages.map((msg) => (
                 <ChatMessage
                   key={msg.id}
