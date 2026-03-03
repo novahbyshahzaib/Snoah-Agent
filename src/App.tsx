@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useState, lazy, Suspense } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import {
   Settings as SettingsIcon,
@@ -14,10 +14,7 @@ import { useApp } from './context/AppContext';
 import type { Chat, Message, Settings } from './types';
 import { streamChatResponse } from './utils/gemini';
 import Sidebar from './components/Sidebar';
-const ChatMessage = lazy(() => import('./components/ChatMessage'));
-const StreamingMessage = lazy(() =>
-  import('./components/ChatMessage').then((mod) => ({ default: mod.StreamingMessage }))
-);
+import ChatMessage, { StreamingMessage } from './components/ChatMessage';
 import ChatInput from './components/ChatInput';
 import SettingsModal from './components/SettingsModal';
 import PersonalizationModal from './components/PersonalizationModal';
@@ -354,28 +351,22 @@ export default function App() {
             )}
 
             {/* Messages */}
-            <Suspense fallback={
-              <div className="flex items-center justify-center py-8">
-                <div className="w-6 h-6 border-2 border-slate-700 border-t-violet-500 rounded-full animate-spin" />
-              </div>
-            }>
-              {currentChat?.messages.map((msg) => (
-                <ChatMessage
-                  key={msg.id}
-                  message={msg}
-                  aiName={settings.aiName}
-                />
-              ))}
+            {currentChat?.messages.map((msg) => (
+              <ChatMessage
+                key={msg.id}
+                message={msg}
+                aiName={settings.aiName}
+              />
+            ))}
 
-              {/* Streaming */}
-              {isStreaming && (
-                <StreamingMessage
-                  content={streamingContent}
-                  thinking={streamingThinking}
-                  aiName={settings.aiName}
-                />
-              )}
-            </Suspense>
+            {/* Streaming */}
+            {isStreaming && (
+              <StreamingMessage
+                content={streamingContent}
+                thinking={streamingThinking}
+                aiName={settings.aiName}
+              />
+            )}
 
             {/* Error */}
             {error && (
