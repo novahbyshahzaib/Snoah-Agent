@@ -109,13 +109,13 @@ export async function streamChatResponse(
     };
   }
 
-  const genModel = client.getGenerativeModel(modelConfig);
-
-  const lastMessage = messages[messages.length - 1];
-  const history = buildHistory(messages);
-  const currentParts = buildCurrentParts(lastMessage);
-
   try {
+    const genModel = client.getGenerativeModel(modelConfig);
+
+    const lastMessage = messages[messages.length - 1];
+    const history = buildHistory(messages);
+    const currentParts = buildCurrentParts(lastMessage);
+
     const chat = genModel.startChat({ history });
     const result = await chat.sendMessageStream(currentParts);
 
