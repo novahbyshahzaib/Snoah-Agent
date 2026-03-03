@@ -177,47 +177,56 @@ export default function App() {
         setStreamingThinking('');
       };
 
-      await streamChatResponse(updatedMessages, settings, {
-        onChunk: (text) => {
-          if (aborted) return;
-          accContent += text;
-          setStreamingContent((prev) => prev + text);
-        },
-        onThinking: (text) => {
-          if (aborted) return;
-          accThinking += text;
-          setStreamingThinking((prev) => prev + text);
-        },
-        onDone: () => {
-          if (aborted) return;
+      try {
+        await streamChatResponse(updatedMessages, settings, {
+          onChunk: (text) => {
+            if (aborted) return;
+            accContent += text;
+            setStreamingContent((prev) => prev + text);
+          },
+          onThinking: (text) => {
+            if (aborted) return;
+            accThinking += text;
+            setStreamingThinking((prev) => prev + text);
+          },
+          onDone: () => {
+            if (aborted) return;
+            dispatch({ type: 'SET_STREAMING', payload: false });
+
+            const assistantMsg: Message = {
+              id: uuidv4(),
+              role: 'assistant',
+              content: accContent,
+              thinking: accThinking || undefined,
+              timestamp: Date.now(),
+            };
+
+            const finalChat: Chat = {
+              ...updatedChat,
+              messages: [...updatedMessages, assistantMsg],
+              updatedAt: Date.now(),
+            };
+
+            dispatch({ type: 'UPDATE_CHAT', payload: finalChat });
+            setStreamingContent('');
+            setStreamingThinking('');
+          },
+          onError: (err) => {
+            if (aborted) return;
+            dispatch({ type: 'SET_STREAMING', payload: false });
+            setError(err.message);
+            setStreamingContent('');
+            setStreamingThinking('');
+          },
+        });
+      } catch (err) {
+        if (!aborted) {
           dispatch({ type: 'SET_STREAMING', payload: false });
-
-          const assistantMsg: Message = {
-            id: uuidv4(),
-            role: 'assistant',
-            content: accContent,
-            thinking: accThinking || undefined,
-            timestamp: Date.now(),
-          };
-
-          const finalChat: Chat = {
-            ...updatedChat,
-            messages: [...updatedMessages, assistantMsg],
-            updatedAt: Date.now(),
-          };
-
-          dispatch({ type: 'UPDATE_CHAT', payload: finalChat });
+          setError(err instanceof Error ? err.message : String(err));
           setStreamingContent('');
           setStreamingThinking('');
-        },
-        onError: (err) => {
-          if (aborted) return;
-          dispatch({ type: 'SET_STREAMING', payload: false });
-          setError(err.message);
-          setStreamingContent('');
-          setStreamingThinking('');
-        },
-      });
+        }
+      }
     },
     [currentChat, dispatch, settings]
   );
