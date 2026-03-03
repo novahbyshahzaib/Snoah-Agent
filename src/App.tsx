@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useState } from 'react';
+import { useEffect, useRef, useCallback, useState, lazy, Suspense } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import {
   Settings as SettingsIcon,
@@ -14,10 +14,14 @@ import { useApp } from './context/AppContext';
 import type { Chat, Message, Settings } from './types';
 import { streamChatResponse } from './utils/gemini';
 import Sidebar from './components/Sidebar';
-import ChatMessage, { StreamingMessage } from './components/ChatMessage';
 import ChatInput from './components/ChatInput';
 import SettingsModal from './components/SettingsModal';
 import PersonalizationModal from './components/PersonalizationModal';
+
+const ChatMessage = lazy(() => import('./components/ChatMessage'));
+const StreamingMessage = lazy(() =>
+  import('./components/ChatMessage').then((mod) => ({ default: mod.StreamingMessage }))
+);
 
 function generateTitle(firstMessage: string): string {
   const trimmed = firstMessage.trim().replace(/\n+/g, ' ');
@@ -351,22 +355,24 @@ export default function App() {
             )}
 
             {/* Messages */}
-            {currentChat?.messages.map((msg) => (
-              <ChatMessage
-                key={msg.id}
-                message={msg}
-                aiName={settings.aiName}
-              />
-            ))}
+            <Suspense fallback={null}>
+              {currentChat?.messages.map((msg) => (
+                <ChatMessage
+                  key={msg.id}
+                  message={msg}
+                  aiName={settings.aiName}
+                />
+              ))}
 
-            {/* Streaming */}
-            {isStreaming && (
-              <StreamingMessage
-                content={streamingContent}
-                thinking={streamingThinking}
-                aiName={settings.aiName}
-              />
-            )}
+              {/* Streaming */}
+              {isStreaming && (
+                <StreamingMessage
+                  content={streamingContent}
+                  thinking={streamingThinking}
+                  aiName={settings.aiName}
+                />
+              )}
+            </Suspense>
 
             {/* Error */}
             {error && (
