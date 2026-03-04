@@ -166,10 +166,10 @@ export default function ChatMessage({ message, aiName }: Props) {
       return <thead className="bg-slate-800">{children}</thead>;
     },
     th({ children }: { children?: React.ReactNode }) {
-      return <th className="px-3 py-2 align-top text-left text-slate-300 font-semibold border border-slate-700 whitespace-normal break-words max-w-[200px]">{children}</th>;
+      return <th className="px-3 py-2 align-top text-left text-slate-300 font-semibold border border-slate-700 whitespace-normal break-words max-w-xs">{children}</th>;
     },
     td({ children }: { children?: React.ReactNode }) {
-      return <td className="px-3 py-2 align-top text-slate-300 border border-slate-800 whitespace-normal break-words max-w-[200px]">{children}</td>;
+      return <td className="px-3 py-2 align-top text-slate-300 border border-slate-800 whitespace-normal break-words max-w-xs">{children}</td>;
     },
     hr() {
       return <hr className="border-slate-700 my-4" />;
@@ -343,10 +343,10 @@ export function StreamingMessage({
       return <thead className="bg-slate-800">{children}</thead>;
     },
     th({ children }: { children?: React.ReactNode }) {
-      return <th className="px-3 py-2 align-top text-left text-slate-300 font-semibold border border-slate-700 whitespace-normal break-words max-w-[200px]">{children}</th>;
+      return <th className="px-3 py-2 align-top text-left text-slate-300 font-semibold border border-slate-700 whitespace-normal break-words max-w-xs">{children}</th>;
     },
     td({ children }: { children?: React.ReactNode }) {
-      return <td className="px-3 py-2 align-top text-slate-300 border border-slate-800 whitespace-normal break-words max-w-[200px]">{children}</td>;
+      return <td className="px-3 py-2 align-top text-slate-300 border border-slate-800 whitespace-normal break-words max-w-xs">{children}</td>;
     },
     strong({ children }: { children?: React.ReactNode }) {
       return <strong className="text-slate-100 font-semibold">{children}</strong>;
