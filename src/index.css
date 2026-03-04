@@ -48,7 +48,63 @@
 /* MathJax / KaTeX overrides */
 .mjx-container {
   overflow-x: auto;
+  overflow-y: hidden;
   padding: 0.25rem 0;
+  max-width: 100%;
+}
+
+.mjx-container svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* MathJax display-mode (block) centering */
+.mjx-container[jax="SVG"][display="true"] {
+  display: block;
+  text-align: center;
+  margin: 0.75rem 0;
+}
+
+/* Thinking section collapse animation */
+.thinking-collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.25s ease;
+}
+
+.thinking-collapse > div {
+  overflow: hidden;
+}
+
+.thinking-collapse-open {
+  grid-template-rows: 1fr;
+}
+
+/* Thinking prose color overrides */
+.thinking-prose {
+  color: #94a3b8;
+}
+
+.thinking-prose p {
+  color: #94a3b8;
+}
+
+.thinking-prose strong {
+  color: #cbd5e1;
+}
+
+.thinking-prose code {
+  color: #c4b5fd;
+}
+
+/* Prose table and code overrides for mobile */
+.prose table {
+  display: table;
+  word-break: break-word;
+}
+
+.prose img {
+  max-width: 100%;
 }
 
 /* Highlight.js overrides */
@@ -63,4 +119,6 @@ pre code.hljs {
 .prose pre {
   margin: 0;
   background: transparent;
+  max-width: 100%;
+  overflow-x: auto;
 }

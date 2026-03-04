@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import remarkGfm from 'remark-gfm';
-import rehypeMathjax from 'rehype-mathjax/browser';
+import rehypeMathjax from 'rehype-mathjax';
 import rehypeHighlight from 'rehype-highlight';
 import { Copy, Check, ChevronDown, ChevronRight, Brain, User, Bot } from 'lucide-react';
 import type { Message } from '../types';
@@ -77,13 +77,20 @@ function ThinkingSection({
           {open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
         </span>
       </button>
-      {open && (
+      <div
+        className={`thinking-collapse ${open ? 'thinking-collapse-open' : ''}`}
+      >
         <div className="px-4 pb-4 pt-1 border-t border-violet-500/20">
-          <p className="text-sm text-slate-400 whitespace-pre-wrap break-words font-mono leading-relaxed">
-            {thinking}
-          </p>
+          <div className="text-sm text-slate-400 break-words leading-relaxed prose prose-invert prose-sm max-w-none thinking-prose">
+            <ReactMarkdown
+              remarkPlugins={[remarkMath, remarkGfm]}
+              rehypePlugins={[rehypeMathjax, rehypeHighlight]}
+            >
+              {thinking}
+            </ReactMarkdown>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -148,8 +155,8 @@ export default function ChatMessage({ message, aiName }: Props) {
     },
     table({ children }: { children?: React.ReactNode }) {
       return (
-        <div className="max-w-full overflow-x-auto my-3">
-          <table className="w-full min-w-[20rem] table-fixed border border-slate-700 rounded-lg overflow-hidden">
+        <div className="max-w-full overflow-x-auto my-3 -mx-4 px-4 md:mx-0 md:px-0">
+          <table className="min-w-full table-auto border-collapse border border-slate-700 rounded-lg overflow-hidden">
             {children}
           </table>
         </div>
@@ -159,10 +166,10 @@ export default function ChatMessage({ message, aiName }: Props) {
       return <thead className="bg-slate-800">{children}</thead>;
     },
     th({ children }: { children?: React.ReactNode }) {
-      return <th className="px-4 py-2 align-top text-left text-slate-300 font-semibold border-b border-slate-700 break-words">{children}</th>;
+      return <th className="px-3 py-2 align-top text-left text-slate-300 font-semibold border border-slate-700 whitespace-normal break-words max-w-xs">{children}</th>;
     },
     td({ children }: { children?: React.ReactNode }) {
-      return <td className="px-4 py-2 align-top text-slate-300 border-b border-slate-800 break-words">{children}</td>;
+      return <td className="px-3 py-2 align-top text-slate-300 border border-slate-800 whitespace-normal break-words max-w-xs">{children}</td>;
     },
     hr() {
       return <hr className="border-slate-700 my-4" />;
@@ -186,7 +193,7 @@ export default function ChatMessage({ message, aiName }: Props) {
       </div>
 
       {/* Content */}
-      <div className={`max-w-[85%] md:max-w-[75%] ${isUser ? 'items-end' : 'items-start'} flex flex-col gap-1`}>
+      <div className={`min-w-0 max-w-[85%] md:max-w-[75%] ${isUser ? 'items-end' : 'items-start'} flex flex-col gap-1`}>
         <span className="text-xs text-slate-500 px-1">
           {isUser ? 'You' : aiName}
         </span>
@@ -211,7 +218,7 @@ export default function ChatMessage({ message, aiName }: Props) {
         {/* Message bubble */}
         {message.content && (
           <div
-            className={`overflow-hidden rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-lg ${
+            className={`overflow-hidden rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-lg min-w-0 ${
               isUser
                 ? 'bg-gradient-to-br from-violet-600 to-cyan-600 text-white rounded-tr-sm'
                 : 'bg-slate-800/80 border border-slate-700/50 text-slate-200 rounded-tl-sm'
@@ -220,7 +227,7 @@ export default function ChatMessage({ message, aiName }: Props) {
             {isUser ? (
               <p className="whitespace-pre-wrap break-words">{message.content}</p>
             ) : (
-              <div className="prose prose-invert prose-sm max-w-none break-words">
+              <div className="prose prose-invert prose-sm max-w-none break-words overflow-x-auto">
                 <ReactMarkdown
                   remarkPlugins={[remarkMath, remarkGfm]}
                   rehypePlugins={[rehypeMathjax, rehypeHighlight]}
@@ -325,8 +332,8 @@ export function StreamingMessage({
     },
     table({ children }: { children?: React.ReactNode }) {
       return (
-        <div className="max-w-full overflow-x-auto my-3">
-          <table className="w-full min-w-[20rem] table-fixed border border-slate-700 rounded-lg overflow-hidden">
+        <div className="max-w-full overflow-x-auto my-3 -mx-4 px-4 md:mx-0 md:px-0">
+          <table className="min-w-full table-auto border-collapse border border-slate-700 rounded-lg overflow-hidden">
             {children}
           </table>
         </div>
@@ -336,10 +343,10 @@ export function StreamingMessage({
       return <thead className="bg-slate-800">{children}</thead>;
     },
     th({ children }: { children?: React.ReactNode }) {
-      return <th className="px-4 py-2 align-top text-left text-slate-300 font-semibold border-b border-slate-700 break-words">{children}</th>;
+      return <th className="px-3 py-2 align-top text-left text-slate-300 font-semibold border border-slate-700 whitespace-normal break-words max-w-xs">{children}</th>;
     },
     td({ children }: { children?: React.ReactNode }) {
-      return <td className="px-4 py-2 align-top text-slate-300 border-b border-slate-800 break-words">{children}</td>;
+      return <td className="px-3 py-2 align-top text-slate-300 border border-slate-800 whitespace-normal break-words max-w-xs">{children}</td>;
     },
     strong({ children }: { children?: React.ReactNode }) {
       return <strong className="text-slate-100 font-semibold">{children}</strong>;
@@ -351,12 +358,12 @@ export function StreamingMessage({
       <div className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-br from-slate-700 to-slate-600 border border-slate-600 shadow-lg">
         <Bot size={14} className="text-white" />
       </div>
-      <div className="max-w-[85%] md:max-w-[75%] flex flex-col gap-1">
+      <div className="min-w-0 max-w-[85%] md:max-w-[75%] flex flex-col gap-1">
         <span className="text-xs text-slate-500 px-1">{aiName}</span>
         {thinking && <ThinkingSection thinking={thinking} defaultOpen />}
         {content && (
-          <div className="overflow-hidden bg-slate-800/80 border border-slate-700/50 text-slate-200 rounded-2xl rounded-tl-sm px-4 py-3 text-sm shadow-lg">
-            <div className="prose prose-invert prose-sm max-w-none break-words">
+          <div className="overflow-hidden bg-slate-800/80 border border-slate-700/50 text-slate-200 rounded-2xl rounded-tl-sm px-4 py-3 text-sm shadow-lg min-w-0">
+            <div className="prose prose-invert prose-sm max-w-none break-words overflow-x-auto">
               <ReactMarkdown
                 remarkPlugins={[remarkMath, remarkGfm]}
                 rehypePlugins={[rehypeMathjax, rehypeHighlight]}
