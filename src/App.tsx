@@ -182,7 +182,7 @@ export default function App() {
 
       try {
         await new Promise<void>((resolve, reject) => {
-          let timeoutId: number | undefined;
+          let timeoutId: ReturnType<typeof window.setTimeout> | undefined;
           const resetTimeout = () => {
             if (timeoutId !== undefined) {
               window.clearTimeout(timeoutId);
@@ -234,14 +234,10 @@ export default function App() {
             },
             onError: (err) => {
               if (aborted) return;
-              dispatch({ type: 'SET_STREAMING', payload: false });
-              setError(err.message);
-              setStreamingContent('');
-              setStreamingThinking('');
               if (timeoutId !== undefined) {
                 window.clearTimeout(timeoutId);
               }
-              resolve();
+              reject(err);
             },
           }).catch((err) => {
             if (timeoutId !== undefined) {
