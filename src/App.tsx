@@ -23,6 +23,8 @@ const StreamingMessage = lazy(() =>
   import('./components/ChatMessage').then((mod) => ({ default: mod.StreamingMessage }))
 );
 
+const STREAM_TIMEOUT_MS = 60000;
+
 function generateTitle(firstMessage: string): string {
   const trimmed = firstMessage.trim().replace(/\n+/g, ' ');
   return trimmed.length > 30 ? trimmed.slice(0, 30) + '…' : trimmed || 'New chat';
@@ -179,49 +181,74 @@ export default function App() {
       };
 
       try {
-        await streamChatResponse(updatedMessages, settings, {
-          onChunk: (text) => {
-            if (aborted) return;
-            accContent += text;
-            setStreamingContent((prev) => prev + text);
-          },
-          onThinking: (text) => {
-            if (aborted) return;
-            accThinking += text;
-            setStreamingThinking((prev) => prev + text);
-          },
-          onDone: () => {
-            if (aborted) return;
-            dispatch({ type: 'SET_STREAMING', payload: false });
+        await new Promise<void>((resolve, reject) => {
+          let timeoutId: ReturnType<typeof window.setTimeout> | undefined;
+          const resetTimeout = () => {
+            if (timeoutId !== undefined) {
+              window.clearTimeout(timeoutId);
+            }
+            timeoutId = window.setTimeout(() => {
+              reject(new Error('Request timed out. Please try again.'));
+            }, STREAM_TIMEOUT_MS);
+          };
+          resetTimeout();
 
-            const assistantMsg: Message = {
-              id: uuidv4(),
-              role: 'assistant',
-              content: accContent,
-              thinking: accThinking || undefined,
-              timestamp: Date.now(),
-            };
+          streamChatResponse(updatedMessages, settings, {
+            onChunk: (text) => {
+              if (aborted) return;
+              resetTimeout();
+              accContent += text;
+              setStreamingContent((prev) => prev + text);
+            },
+            onThinking: (text) => {
+              if (aborted) return;
+              resetTimeout();
+              accThinking += text;
+              setStreamingThinking((prev) => prev + text);
+            },
+            onDone: () => {
+              if (aborted) return;
+              dispatch({ type: 'SET_STREAMING', payload: false });
 
-            const finalChat: Chat = {
-              ...updatedChat,
-              messages: [...updatedMessages, assistantMsg],
-              updatedAt: Date.now(),
-            };
+              const assistantMsg: Message = {
+                id: uuidv4(),
+                role: 'assistant',
+                content: accContent,
+                thinking: accThinking || undefined,
+                timestamp: Date.now(),
+              };
 
-            dispatch({ type: 'UPDATE_CHAT', payload: finalChat });
-            setStreamingContent('');
-            setStreamingThinking('');
-          },
-          onError: (err) => {
-            if (aborted) return;
-            dispatch({ type: 'SET_STREAMING', payload: false });
-            setError(err.message);
-            setStreamingContent('');
-            setStreamingThinking('');
-          },
+              const finalChat: Chat = {
+                ...updatedChat,
+                messages: [...updatedMessages, assistantMsg],
+                updatedAt: Date.now(),
+              };
+
+              dispatch({ type: 'UPDATE_CHAT', payload: finalChat });
+              setStreamingContent('');
+              setStreamingThinking('');
+              if (timeoutId !== undefined) {
+                window.clearTimeout(timeoutId);
+              }
+              resolve();
+            },
+            onError: (err) => {
+              if (aborted) return;
+              if (timeoutId !== undefined) {
+                window.clearTimeout(timeoutId);
+              }
+              reject(err);
+            },
+          }).catch((err) => {
+            if (timeoutId !== undefined) {
+              window.clearTimeout(timeoutId);
+            }
+            reject(err);
+          });
         });
       } catch (err) {
         if (!aborted) {
+          aborted = true;
           dispatch({ type: 'SET_STREAMING', payload: false });
           setError(err instanceof Error ? err.message : String(err));
           setStreamingContent('');

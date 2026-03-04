@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
-import rehypeMathjax from 'rehype-mathjax';
+import rehypeMathjax from 'rehype-mathjax/browser';
 import rehypeHighlight from 'rehype-highlight';
 import rehypeRaw from 'rehype-raw';
 import { Copy, Check, ChevronDown, ChevronRight, Brain, User, Bot } from 'lucide-react';
