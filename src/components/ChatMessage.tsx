@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
+import remarkGfm from 'remark-gfm';
 import rehypeMathjax from 'rehype-mathjax/browser';
 import rehypeHighlight from 'rehype-highlight';
-import rehypeRaw from 'rehype-raw';
 import { Copy, Check, ChevronDown, ChevronRight, Brain, User, Bot } from 'lucide-react';
 import type { Message } from '../types';
 import 'highlight.js/styles/github-dark.css';
@@ -47,7 +47,7 @@ function CodeBlock({ children, className }: { children: React.ReactNode; classNa
           )}
         </button>
       </div>
-      <pre className="overflow-x-auto bg-slate-900/80 p-4 m-0">
+      <pre className="max-w-full overflow-x-auto bg-slate-900/80 p-4 m-0">
         <code ref={codeRef} className={className}>
           {children}
         </code>
@@ -56,8 +56,14 @@ function CodeBlock({ children, className }: { children: React.ReactNode; classNa
   );
 }
 
-function ThinkingSection({ thinking }: { thinking: string }) {
-  const [open, setOpen] = useState(false);
+function ThinkingSection({
+  thinking,
+  defaultOpen = false,
+}: {
+  thinking: string;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
 
   return (
     <div className="mb-3 rounded-xl border border-violet-500/20 bg-violet-950/20 overflow-hidden">
@@ -73,7 +79,7 @@ function ThinkingSection({ thinking }: { thinking: string }) {
       </button>
       {open && (
         <div className="px-4 pb-4 pt-1 border-t border-violet-500/20">
-          <p className="text-sm text-slate-400 whitespace-pre-wrap font-mono leading-relaxed">
+          <p className="text-sm text-slate-400 whitespace-pre-wrap break-words font-mono leading-relaxed">
             {thinking}
           </p>
         </div>
@@ -142,8 +148,8 @@ export default function ChatMessage({ message, aiName }: Props) {
     },
     table({ children }: { children?: React.ReactNode }) {
       return (
-        <div className="overflow-x-auto my-3">
-          <table className="min-w-full border border-slate-700 rounded-lg overflow-hidden">
+        <div className="max-w-full overflow-x-auto my-3">
+          <table className="w-full min-w-[32rem] table-fixed border border-slate-700 rounded-lg overflow-hidden">
             {children}
           </table>
         </div>
@@ -153,10 +159,10 @@ export default function ChatMessage({ message, aiName }: Props) {
       return <thead className="bg-slate-800">{children}</thead>;
     },
     th({ children }: { children?: React.ReactNode }) {
-      return <th className="px-4 py-2 text-left text-slate-300 font-semibold border-b border-slate-700">{children}</th>;
+      return <th className="px-4 py-2 align-top text-left text-slate-300 font-semibold border-b border-slate-700 break-words">{children}</th>;
     },
     td({ children }: { children?: React.ReactNode }) {
-      return <td className="px-4 py-2 text-slate-300 border-b border-slate-800">{children}</td>;
+      return <td className="px-4 py-2 align-top text-slate-300 border-b border-slate-800 break-words">{children}</td>;
     },
     hr() {
       return <hr className="border-slate-700 my-4" />;
@@ -205,19 +211,19 @@ export default function ChatMessage({ message, aiName }: Props) {
         {/* Message bubble */}
         {message.content && (
           <div
-            className={`rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-lg ${
+            className={`overflow-hidden rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-lg ${
               isUser
                 ? 'bg-gradient-to-br from-violet-600 to-cyan-600 text-white rounded-tr-sm'
                 : 'bg-slate-800/80 border border-slate-700/50 text-slate-200 rounded-tl-sm'
             }`}
           >
             {isUser ? (
-              <p className="whitespace-pre-wrap">{message.content}</p>
+              <p className="whitespace-pre-wrap break-words">{message.content}</p>
             ) : (
-              <div className="prose prose-invert prose-sm max-w-none">
+              <div className="prose prose-invert prose-sm max-w-none break-words">
                 <ReactMarkdown
-                  remarkPlugins={[remarkMath]}
-                  rehypePlugins={[rehypeMathjax, rehypeHighlight, rehypeRaw]}
+                  remarkPlugins={[remarkMath, remarkGfm]}
+                  rehypePlugins={[rehypeMathjax, rehypeHighlight]}
                   components={markdownComponents}
                 >
                   {message.content}
@@ -317,6 +323,24 @@ export function StreamingMessage({
         </a>
       );
     },
+    table({ children }: { children?: React.ReactNode }) {
+      return (
+        <div className="max-w-full overflow-x-auto my-3">
+          <table className="w-full min-w-[32rem] table-fixed border border-slate-700 rounded-lg overflow-hidden">
+            {children}
+          </table>
+        </div>
+      );
+    },
+    thead({ children }: { children?: React.ReactNode }) {
+      return <thead className="bg-slate-800">{children}</thead>;
+    },
+    th({ children }: { children?: React.ReactNode }) {
+      return <th className="px-4 py-2 align-top text-left text-slate-300 font-semibold border-b border-slate-700 break-words">{children}</th>;
+    },
+    td({ children }: { children?: React.ReactNode }) {
+      return <td className="px-4 py-2 align-top text-slate-300 border-b border-slate-800 break-words">{children}</td>;
+    },
     strong({ children }: { children?: React.ReactNode }) {
       return <strong className="text-slate-100 font-semibold">{children}</strong>;
     },
@@ -329,23 +353,13 @@ export function StreamingMessage({
       </div>
       <div className="max-w-[85%] md:max-w-[75%] flex flex-col gap-1">
         <span className="text-xs text-slate-500 px-1">{aiName}</span>
-        {thinking && (
-          <div className="mb-2 rounded-xl border border-violet-500/20 bg-violet-950/20 overflow-hidden">
-            <div className="flex items-center gap-2 px-4 py-2.5 text-sm text-violet-300">
-              <Brain size={14} className="animate-pulse text-violet-400" />
-              <span className="font-medium">Thinking…</span>
-            </div>
-            <div className="px-4 pb-3 pt-1 border-t border-violet-500/20 max-h-32 overflow-y-auto">
-              <p className="text-xs text-slate-400 whitespace-pre-wrap font-mono">{thinking}</p>
-            </div>
-          </div>
-        )}
+        {thinking && <ThinkingSection thinking={thinking} defaultOpen />}
         {content && (
-          <div className="bg-slate-800/80 border border-slate-700/50 text-slate-200 rounded-2xl rounded-tl-sm px-4 py-3 text-sm shadow-lg">
-            <div className="prose prose-invert prose-sm max-w-none">
+          <div className="overflow-hidden bg-slate-800/80 border border-slate-700/50 text-slate-200 rounded-2xl rounded-tl-sm px-4 py-3 text-sm shadow-lg">
+            <div className="prose prose-invert prose-sm max-w-none break-words">
               <ReactMarkdown
-                remarkPlugins={[remarkMath]}
-                rehypePlugins={[rehypeMathjax, rehypeHighlight, rehypeRaw]}
+                remarkPlugins={[remarkMath, remarkGfm]}
+                rehypePlugins={[rehypeMathjax, rehypeHighlight]}
                 components={markdownComponents}
               >
                 {content}
