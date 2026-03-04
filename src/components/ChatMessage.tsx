@@ -149,7 +149,7 @@ export default function ChatMessage({ message, aiName }: Props) {
     table({ children }: { children?: React.ReactNode }) {
       return (
         <div className="max-w-full overflow-x-auto my-3">
-          <table className="w-full min-w-[32rem] table-fixed border border-slate-700 rounded-lg overflow-hidden">
+          <table className="w-full min-w-[20rem] table-fixed border border-slate-700 rounded-lg overflow-hidden">
             {children}
           </table>
         </div>
@@ -326,7 +326,7 @@ export function StreamingMessage({
     table({ children }: { children?: React.ReactNode }) {
       return (
         <div className="max-w-full overflow-x-auto my-3">
-          <table className="w-full min-w-[32rem] table-fixed border border-slate-700 rounded-lg overflow-hidden">
+          <table className="w-full min-w-[20rem] table-fixed border border-slate-700 rounded-lg overflow-hidden">
             {children}
           </table>
         </div>
