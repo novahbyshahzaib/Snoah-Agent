@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import remarkGfm from 'remark-gfm';
-import rehypeMathjax from 'rehype-mathjax';
+import rehypeMathjax from 'rehype-mathjax/browser';
 import rehypeHighlight from 'rehype-highlight';
 import { Copy, Check, ChevronDown, ChevronRight, Brain, User, Bot } from 'lucide-react';
 import type { Message } from '../types';
